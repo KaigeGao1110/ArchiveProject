@@ -2,12 +2,9 @@
 name: archive-project
 version: 1.0.7
 description: Organize completed projects into searchable archives with session transcript backup.
-configPaths:
-  - path: "${SESSION_TRANSCRIPT_PATH:-$HOME/.openclaw/agents/main/sessions/}"
-    description: |
-      Directory containing agent session transcript files (JSONL format).
-      Default: ~/.openclaw/agents/main/sessions/ (standard for all users).
-      Override via SESSION_TRANSCRIPT_PATH env var for custom session storage (e.g., EFS mount).
+required:
+  bins:
+    - git
 permissions:
   - read: session transcripts from configured path
   - write: workspace/projects/ directory
@@ -95,8 +92,16 @@ workspace/projects/<project-name>/
 # Override: set SESSION_TRANSCRIPT_PATH to a custom path (e.g., EFS mount)
 SESSION_DIR="${SESSION_TRANSCRIPT_PATH:-$HOME/.openclaw/agents/main/sessions/}"
 
-# Find most recent main session transcript
-MAIN_SESSION_PATH=$(ls -t "${SESSION_DIR}"*.jsonl 2>/dev/null | head -1)
+# Find main session transcript using explicit session key (from session label or passed argument)
+# Use the session key/label to match the exact transcript file
+SESSION_KEY="${1:-}"  # Pass session key as argument or extract from context
+if [ -n "$SESSION_KEY" ]; then
+  MAIN_SESSION_PATH=$(grep -l "$SESSION_KEY" "${SESSION_DIR}"*.jsonl 2>/dev/null | head -1)
+fi
+# Fallback: if no key provided or not found, use most recent transcript
+if [ -z "$MAIN_SESSION_PATH" ] || [ ! -f "$MAIN_SESSION_PATH" ]; then
+  MAIN_SESSION_PATH=$(ls -t "${SESSION_DIR}"*.jsonl 2>/dev/null | head -1)
+fi
 
 # Create project archive directory
 mkdir -p workspace/projects/<project-name>/subagent_sessions/
