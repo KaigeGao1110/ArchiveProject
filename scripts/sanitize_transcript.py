@@ -185,7 +185,7 @@ REDACTION_PATTERNS = [
     # -------------------------------------------------------------------------
     (
         r'([A-Za-z0-9_-]*(?:password|passwd|pwd|secret|token|auth)[A-Za-z0-9_-]*)\s*[=:]\s*[^\s\"\';,]{8,}',
-        '\1=[REDACTED]',
+        r'\1=[REDACTED]',
         'Environment variable credentials (password=, token=, secret=, etc.)',
     ),
     (
@@ -195,8 +195,24 @@ REDACTION_PATTERNS = [
     ),
 ]
 
+# Strict mode patterns — additional checks when --strict is enabled
+STRICT_PATTERNS = [
+    # Lines containing sensitive keywords — redact the entire line
+    (
+        r'.*\b(token|secret|key|password|credential)s?\b.*',
+        '[REDACTED-STRICT]',
+        'Lines containing sensitive keywords (token, secret, key, password, credential)',
+    ),
+    # HTTP Authorization headers
+    (
+        r'.*Authorization:.*',
+        '[REDACTED-AUTH-HEADER]',
+        'HTTP Authorization headers',
+    ),
+]
 
-def redact_text(text: str) -> str:
+
+def redact_text(text: str, strict: bool = False) -> str:
     """
     Apply all redaction patterns to a text string.
     Returns the redacted string.
@@ -204,10 +220,13 @@ def redact_text(text: str) -> str:
     result = str(text)
     for pattern, replacement, description in REDACTION_PATTERNS:
         result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
+    if strict:
+        for pattern, replacement, description in STRICT_PATTERNS:
+            result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
     return result
 
 
-def sanitize_value(value: Any) -> Any:
+def sanitize_value(value: Any, strict: bool = False) -> Any:
     """
     Recursively sanitize a value, preserving structure.
     - Strings are redacted
@@ -215,11 +234,11 @@ def sanitize_value(value: Any) -> Any:
     - Lists sanitize each element
     """
     if isinstance(value, str):
-        return redact_text(value)
+        return redact_text(value, strict=strict)
     elif isinstance(value, dict):
-        return {k: sanitize_value(v) for k, v in value.items()}
+        return {k: sanitize_value(v, strict=strict) for k, v in value.items()}
     elif isinstance(value, list):
-        return [sanitize_value(item) for item in value]
+        return [sanitize_value(item, strict=strict) for item in value]
     else:
         # int, float, bool, None — return as-is
         return value
@@ -238,18 +257,18 @@ def process_jsonl(input_path: Path, output_handle, strict: bool = False) -> int:
                 continue
             try:
                 record = json.loads(line)
-                sanitized = sanitize_value(record)
+                sanitized = sanitize_value(record, strict=strict)
                 output_handle.write(json.dumps(sanitized, ensure_ascii=False) + '\n')
                 count += 1
             except json.JSONDecodeError as e:
                 if strict:
                     raise RuntimeError(f"JSON parse error on line {line_num}: {e}")
-                # Non-JSON lines are passed through as-is (not redacted, but not erroring)
-                output_handle.write(line + '\n')
+                # Non-JSON lines are still sanitized before being passed through
+                output_handle.write(redact_text(line, strict=strict) + '\n')
     return count
 
 
-def process_json(input_path: Path, output_handle) -> int:
+def process_json(input_path: Path, output_handle, strict: bool = False) -> int:
     """
     Process a JSON file (array or object), sanitizing all strings.
     Returns the number of records processed.
@@ -257,7 +276,7 @@ def process_json(input_path: Path, output_handle) -> int:
     with open(input_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
-    sanitized = sanitize_value(data)
+    sanitized = sanitize_value(data, strict=strict)
     
     if isinstance(sanitized, list):
         for item in sanitized:
@@ -363,7 +382,7 @@ def main():
             if suffix == '.jsonl' or suffix == '.jsonl.gz':
                 count = process_jsonl(args.input, output_handle, args.strict)
             elif suffix == '.json':
-                count = process_json(args.input, output_handle)
+                count = process_json(args.input, output_handle, args.strict)
             else:
                 # Try JSONL by default for unknown extensions
                 count = process_jsonl(args.input, output_handle, args.strict)
