@@ -1,6 +1,6 @@
 ---
 name: archive-project
-version: 1.0.7
+version: 1.2.0
 description: Organize completed projects into searchable archives with session transcript backup.
 required:
   bins:

@@ -1,6 +1,31 @@
 # Archive Project Skill
 
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 Organize completed projects into complete, long-term searchable archives.
+
+## Installation
+
+```bash
+# Via ClawhHub
+clawdhub install archive-project
+
+# Via Git
+git clone https://github.com/KaigeGao1110/ArchiveProject ~/.openclaw/workspace/skills/archive-project
+```
+
+## Quick Start
+
+### Via slash command
+
+```
+//archive cureforge-hr-assessment
+```
+
+### Via natural language
+
+Say **"archive this"** or **"can we archive this"** when a project is complete.
 
 ## What It Does
 
@@ -11,16 +36,16 @@ Organize completed projects into complete, long-term searchable archives.
 - Updates `MEMORY.md` for future reference
 - Git-commits to the internal workspace
 
-## Usage
+## Archive Structure
 
-Trigger: when you say **"archive this"** or **"can we archive this"**
-
-The skill will:
-1. Create project archive directory
-2. Back up session transcripts (with credential sanitization)
-3. Write `ARCHIVE.md` from template
-4. Update `MEMORY.md`
-5. Git commit to workspace
+```
+workspace/projects/<project-name>/
+  ARCHIVE.md
+  session_transcript.jsonl
+  subagent_sessions/
+  deliverables/
+  decisions.md
+```
 
 ## Data Privacy
 
