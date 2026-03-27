@@ -1,14 +1,23 @@
 ---
 name: archive-project
-version: 1.2.0
+version: 1.2.1
 description: Organize completed projects into searchable archives with session transcript backup.
 required:
   bins:
     - git
+    - python3
+env:
+  SESSION_TRANSCRIPT_PATH:
+    description: Path to session transcript directory. Defaults to ~/.openclaw/agents/main/sessions/
+    required: false
+    default: ~/.openclaw/agents/main/sessions/
+configPaths:
+  - ~/.openclaw/agents/main/sessions/
 permissions:
-  - read: session transcripts from configured path
+  - read: session transcripts from configured path (~/.openclaw/agents/main/sessions/ or SESSION_TRANSCRIPT_PATH)
   - write: workspace/projects/ directory
   - exec: git commit commands
+  - exec: python3 scripts/sanitize_transcript.py
 dataPolicy:
   archivedData: internal workspace only
   neverExternal: true
