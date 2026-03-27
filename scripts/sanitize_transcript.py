@@ -262,9 +262,10 @@ def process_jsonl(input_path: Path, output_handle, strict: bool = False) -> int:
                 count += 1
             except json.JSONDecodeError as e:
                 if strict:
-                    raise RuntimeError(f"JSON parse error on line {line_num}: {e}")
+                    redacted = redact_text(line)
+                    raise RuntimeError(f"JSON parse error on line {line_num} (line was sanitized before error): {e}\nSanitized: {redacted[:200]}")
                 # Non-JSON lines are still sanitized before being passed through
-                output_handle.write(redact_text(line, strict=strict) + '\n')
+                output_handle.write(redact_text(line) + '\n')
     return count
 
 
