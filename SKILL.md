@@ -1,7 +1,9 @@
 ---
 name: archive-project
-version: 1.2.1
+version: 1.2.3
+homepage: https://github.com/KaigeGao1110/ArchiveProject
 description: Organize completed projects into searchable archives with session transcript backup.
+dependencies: []
 required:
   bins:
     - git
@@ -12,9 +14,10 @@ env:
     required: false
     default: ~/.openclaw/agents/main/sessions/
 configPaths:
-  - ~/.openclaw/agents/main/sessions/
+  - path: ~/.openclaw/agents/main/sessions/
+    description: Required for reading session transcript files prior to archiving.
 permissions:
-  - read: session transcripts from configured path (~/.openclaw/agents/main/sessions/ or SESSION_TRANSCRIPT_PATH)
+  - read: session transcripts from configured path
   - write: workspace/projects/ directory
   - exec: git commit commands
   - exec: python3 scripts/sanitize_transcript.py
@@ -25,6 +28,32 @@ command-dispatch: tool
 command-tool: archive-project-start
 command-arg-mode: raw
 ---
+
+## Installation
+
+### Option 1: ClawhHub CLI (recommended)
+```bash
+openclaw skills install archive-project
+# or
+clawhub install archive-project
+```
+
+### Option 2: From GitHub
+```bash
+# Clone the repo
+git clone https://github.com/KaigeGao1110/ArchiveProject.git ~/.openclaw/skills/archive-project
+
+# Or download directly
+curl -L https://github.com/KaigeGao1110/ArchiveProject/archive/refs/heads/main.zip -o /tmp/archive-project.zip
+unzip /tmp/archive-project.zip -d ~/.openclaw/skills/
+mv ~/.openclaw/skills/ArchiveProject-main ~/.openclaw/skills/archive-project
+```
+
+### Option 3: Copy from local workspace (this machine)
+```bash
+cp -r /home/ubuntu/.openclaw/workspace/skills/archive-project ~/.openclaw/skills/
+openclaw gateway restart
+```
 
 ## Tools
 
@@ -368,5 +397,3 @@ python3 scripts/sanitize_transcript.py --test
 - **Non-destructive**: Original file is never modified
 - **Structure-preserving**: JSON/JSONL structure is maintained; only string values are redacted
 - **Testable**: Built-in test mode verifies redaction patterns
-
-
