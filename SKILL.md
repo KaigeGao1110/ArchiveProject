@@ -4,15 +4,6 @@ version: 1.2.4
 homepage: https://github.com/KaigeGao1110/ArchiveProject
 description: Organize completed projects into searchable archives with session transcript backup.
 dependencies: []
-required:
-  bins:
-    - git
-    - python3
-env:
-  SESSION_TRANSCRIPT_PATH:
-    description: Path to session transcript directory. Defaults to ~/.openclaw/agents/main/sessions/
-    required: false
-    default: ~/.openclaw/agents/main/sessions/
 configPaths:
   - path: ~/.openclaw/agents/main/sessions/
     description: Required for reading session transcript files prior to archiving.
@@ -24,9 +15,6 @@ permissions:
 dataPolicy:
   archivedData: internal workspace only
   neverExternal: true
-command-dispatch: tool
-command-tool: archive-project-start
-command-arg-mode: raw
 ---
 
 ## Installation
@@ -48,31 +36,6 @@ curl -L https://github.com/KaigeGao1110/ArchiveProject/archive/refs/heads/main.z
 unzip /tmp/archive-project.zip -d ~/.openclaw/skills/
 mv ~/.openclaw/skills/ArchiveProject-main ~/.openclaw/skills/archive-project
 ```
-
-## Tools
-
-### archive-project-start
-
-**Input:** Project name or path following "//archive "
-
-**What it does:**
-- Archives a completed project into a structured, long-term searchable format
-- Collects and backs up session transcripts (with credential sanitization)
-- Generates ARCHIVE.md with timeline, decisions, and lessons
-- Updates MEMORY.md for future reference
-
-**When to use:**
-- User says "//archive cureforge-hr-assessment"
-- User says "//archive this project"
-- A project is complete and ready for long-term storage
-
-**Important:** This skill NEVER auto-deletes files. Always ask for human approval before deleting any transcript files.
-
-**Examples:**
-- Input: "//archive cureforge-hr-assessment"
-- Output: "Archiving project: cureforge-hr-assessment. Creating structured archive..."
-
----
 
 # Archive Project Skill
 
