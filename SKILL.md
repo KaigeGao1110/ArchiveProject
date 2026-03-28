@@ -1,6 +1,6 @@
 ---
 name: archive-project
-version: 1.2.3
+version: 1.2.4
 homepage: https://github.com/KaigeGao1110/ArchiveProject
 description: Organize completed projects into searchable archives with session transcript backup.
 dependencies: []
