@@ -49,12 +49,6 @@ unzip /tmp/archive-project.zip -d ~/.openclaw/skills/
 mv ~/.openclaw/skills/ArchiveProject-main ~/.openclaw/skills/archive-project
 ```
 
-### Option 3: Copy from local workspace (this machine)
-```bash
-cp -r /home/ubuntu/.openclaw/workspace/skills/archive-project ~/.openclaw/skills/
-openclaw gateway restart
-```
-
 ## Tools
 
 ### archive-project-start
